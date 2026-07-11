@@ -42,7 +42,7 @@ On x86-64, the image deliberately uses OpenCode's official baseline binary so a 
 
 ## Deploy on Railway
 
-The published Railway template creates one service and mounts one persistent volume at `/data`. It does not create a public domain.
+[Deploy OpenCode Computer on Railway](https://railway.com/deploy/opencode-computer). The template creates one service and mounts one persistent volume at `/data`. It does not create a public domain.
 
 After deployment, direct access is optional:
 
