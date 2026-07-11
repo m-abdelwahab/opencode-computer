@@ -81,9 +81,7 @@ jobs:
               original_owner=$(stat -c "%u:%g:%a" /etc/sudoers.d)
               mv /data/home/.local/bin /data/home/.local/bin.real
               ln -s /etc/sudoers.d /data/home/.local/bin
-              if sudo /usr/local/sbin/opencode-computer-bootstrap; then
-                exit 1
-              fi
+              sudo /usr/local/sbin/opencode-computer-bootstrap
               test "$(stat -c "%u:%g:%a" /etc/sudoers.d)" = "$original_owner"
               rm /data/home/.local/bin
               mv /data/home/.local/bin.real /data/home/.local/bin
