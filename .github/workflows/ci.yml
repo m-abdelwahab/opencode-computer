@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: opencode-computer:test
+      - name: Smoke test container
+        run: |
+          docker run --detach \
+            --name opencode-computer-test \
+            --tmpfs /data:rw,exec,nosuid,size=512m,mode=0755,uid=0,gid=0 \
+            --env PORT=18181 \
+            --publish 127.0.0.1:18181:18181 \
+            opencode-computer:test
+
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:18181/readyz > /dev/null; then
+              break
+            fi
+            if [[ "$attempt" == 60 ]]; then
+              curl --silent --show-error http://127.0.0.1:18181/readyz || true
+              docker exec opencode-computer-test \
+                curl --silent --show-error http://127.0.0.1:43117/readyz || true
+              docker logs opencode-computer-test
+              exit 1
+            fi
+            sleep 1
+          done
+
+          curl --fail --silent http://127.0.0.1:18181/livez \
+            | jq --exit-status '.ok == true'
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            http://127.0.0.1:18181/v1/info)" = "404"
+          docker exec opencode-computer-test \
+            sh -c 'test "$(stat -c "%U:%G:%a" /opt/opencode-computer/src/agentd.mjs)" = "root:root:644"'
+          docker exec opencode-computer-test \
+            sh -c 'pgrep -u agentd -f "node /opt/opencode-computer/src/agentd.mjs"'
+          docker exec --user root opencode-computer-test \
+            sh -c 'pgrep -u computer -f "opencode serve"'
+          test "$(docker exec opencode-computer-test opencode --version)" = "1.17.18"
+          docker exec opencode-computer-test railway --version
+          docker exec opencode-computer-test \
+            sh -c 'test "$(readlink /data/home/.config/opencode/skills)" = "/data/skills"'
+          docker exec opencode-computer-test \
+            sh -c 'test "$(curl --silent --output /dev/null --write-out "%{http_code}" http://127.0.0.1:4096/global/health)" = "401"'
+          docker exec opencode-computer-test \
+            sh -c 'password=$(cat /data/control/opencode-server-password); curl --fail --silent --user "opencode:$password" http://127.0.0.1:4096/global/health' \
+            | jq --exit-status '.healthy == true and .version == "1.17.18"'
+          docker exec opencode-computer-test \
+            sudo /usr/local/sbin/opencode-computer-bootstrap
+          docker exec opencode-computer-test \
+            sh -c '
+              set -eu
+              original_owner=$(stat -c "%u:%g:%a" /etc/sudoers.d)
+              mv /data/home/.local/bin /data/home/.local/bin.real
+              ln -s /etc/sudoers.d /data/home/.local/bin
+              if sudo /usr/local/sbin/opencode-computer-bootstrap; then
+                exit 1
+              fi
+              test "$(stat -c "%u:%g:%a" /etc/sudoers.d)" = "$original_owner"
+              rm /data/home/.local/bin
+              mv /data/home/.local/bin.real /data/home/.local/bin
+            '
+          docker exec opencode-computer-test opencode debug paths \
+            | grep --fixed-strings '/data/home/.local/share/opencode'
+          docker exec opencode-computer-test opencode debug paths \
+            | grep --fixed-strings '/data/home/.config/opencode'
+          docker exec --user root opencode-computer-test \
+            sh -c 'pkill -TERM -u computer -f "opencode serve"'
+          exit_code="$(timeout 20 docker wait opencode-computer-test)"
+          test "$exit_code" -ne 0
+      - name: Stop smoke-test container
+        if: always()
+        run: docker rm --force opencode-computer-test 2>/dev/null || true

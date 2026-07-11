@@ -1,0 +1,15 @@
+{
+  "name": "opencode-computer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Persistent, private Railway computer runtime for OpenCode",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/agentd.mjs",
+    "test": "node --test",
+    "check": "node --check src/agentd.mjs && node --test"
+  }
+}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">OpenCode Computer</title>
+  <desc id="desc">An independent cloud computer mark made from a terminal window and orbit.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12151d"/>
+      <stop offset="1" stop-color="#262d3b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b8ff65"/>
+      <stop offset="1" stop-color="#69e6ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" rx="56" fill="url(#bg)"/>
+  <path d="M148 320c0-135 111-244 248-244 93 0 174 50 217 124" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="18" stroke-linecap="round"/>
+  <path d="M1052 310c0 135-111 244-248 244-93 0-174-50-217-124" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="163" cy="318" r="14" fill="#b8ff65"/>
+  <circle cx="1037" cy="312" r="14" fill="#69e6ff"/>
+  <rect x="245" y="135" width="710" height="360" rx="34" fill="#0b0e14" stroke="url(#accent)" stroke-width="7"/>
+  <circle cx="293" cy="181" r="10" fill="#ff6b6b"/>
+  <circle cx="327" cy="181" r="10" fill="#ffd166"/>
+  <circle cx="361" cy="181" r="10" fill="#7ee787"/>
+  <path d="M328 286l76 66-76 66" fill="none" stroke="#b8ff65" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M458 421h174" fill="none" stroke="#69e6ff" stroke-width="22" stroke-linecap="round"/>
+  <path d="M496 495v45m208-45v45M440 550h320" fill="none" stroke="#dce4f2" stroke-width="18" stroke-linecap="round"/>
+  <text x="695" y="300" fill="#f3f6fb" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="54" font-weight="700" text-anchor="middle">AGENT</text>
+  <text x="695" y="370" fill="#9ca9bc" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="34" text-anchor="middle">COMPUTER</text>
+</svg>
